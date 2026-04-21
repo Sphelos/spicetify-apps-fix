@@ -7,6 +7,7 @@ import useAppStore, {
 } from 'custom-apps/playlist-maker/src/stores/store';
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { ConfirmDialog } from '../../shared/ConfirmDialog';
 
 export function ConfirmLoadDialog(): JSX.Element {
     const { loadWorkflow }: Pick<AppState, 'loadWorkflow'> = useAppStore(
@@ -31,7 +32,7 @@ export function ConfirmLoadDialog(): JSX.Element {
     );
 
     return (
-        <Spicetify.ReactComponent.ConfirmDialog
+        <ConfirmDialog
             isOpen={showConfirmLoadModal}
             onConfirm={async () => {
                 setShowConfirmLoadModal(false);
@@ -67,8 +68,6 @@ export function ConfirmLoadDialog(): JSX.Element {
             }}
             titleText="Load workflow"
             descriptionText="You have unsaved changes that will be lost. Confirm?"
-            confirmText="Confirm"
-            cancelText="Cancel"
         />
     );
 }

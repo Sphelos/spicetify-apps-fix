@@ -6,6 +6,7 @@ import useAppStore, {
 } from 'custom-apps/playlist-maker/src/stores/store';
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { ConfirmDialog } from '../../shared/ConfirmDialog';
 
 export function ConfirmNewDialog(): JSX.Element {
     const { resetState }: Pick<AppState, 'resetState'> = useAppStore(
@@ -26,7 +27,7 @@ export function ConfirmNewDialog(): JSX.Element {
         );
 
     return (
-        <Spicetify.ReactComponent.ConfirmDialog
+        <ConfirmDialog
             isOpen={showConfirmNewModal}
             onConfirm={() => {
                 setShowConfirmNewModal(false);
@@ -40,8 +41,6 @@ export function ConfirmNewDialog(): JSX.Element {
             }}
             titleText="Create new workflow"
             descriptionText="You have unsaved changes that will be lost. Confirm?"
-            confirmText="Confirm"
-            cancelText="Cancel"
         />
     );
 }
