@@ -3,6 +3,13 @@
 This changelog tracks fork-specific changes for `playlist-maker` in the
 `spicetify-apps-fix` fork. Newest entries go at the top and stay concise.
 
+## 1.4.1-sphelos.3
+
+- Added focused tests for the custom confirmation modal behavior.
+- Covered confirm, cancel, outside click, and backdrop-style selection paths.
+
+---
+
 ## 1.4.1-sphelos.2
 
 - Replaced the browser confirm fallback with a styled in-app confirmation
