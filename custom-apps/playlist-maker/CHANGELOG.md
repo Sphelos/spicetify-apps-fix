@@ -3,6 +3,17 @@
 This changelog tracks fork-specific changes for `playlist-maker` in the
 `spicetify-apps-fix` fork. Newest entries go at the top and stay concise.
 
+## 1.4.1-sphelos.2
+
+- Replaced the browser confirm fallback with a styled in-app confirmation
+  modal.
+- Added confirmation modal backdrop settings in the settings wheel:
+  `Transparent`, `Light dim`, and `Shadow only`.
+- Split the settings modal into smaller section components for easier future
+  changes.
+
+---
+
 ## 1.4.1-sphelos.1
 
 - Replaced the brittle Spotify-internal `ConfirmDialog` workaround with a
@@ -20,4 +31,3 @@ This changelog tracks fork-specific changes for `playlist-maker` in the
   `Spicetify.ReactComponent.ConfirmDialog` was unavailable at runtime.
 - Replaced the crashing confirmation path for new/load/delete workflow actions
   with a local fallback.
-
