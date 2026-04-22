@@ -91,16 +91,31 @@ export function CenterPanel(): JSX.Element {
             return;
         }
 
+        const nextWorkflowName = workflowName.trim();
+
+        if (nextWorkflowName.length === 0) {
+            return;
+        }
+
         const flow = reactFlowInstance.toObject();
         await saveOrUpdateWorkflow({
             ...flow,
             id: workflowId,
-            name: workflowName,
+            name: nextWorkflowName,
             lastUpdated: Date.now(),
         });
         onWorkflowSaved();
+        if (nextWorkflowName !== workflowName) {
+            setWorkflowName(nextWorkflowName);
+        }
         Spicetify.showNotification('Workflow saved', false, 1000);
-    }, [reactFlowInstance, onWorkflowSaved, workflowId, workflowName]);
+    }, [
+        reactFlowInstance,
+        onWorkflowSaved,
+        setWorkflowName,
+        workflowId,
+        workflowName,
+    ]);
 
     const resetWorkflow = useCallback(() => {
         if (hasPendingChanges) {
@@ -123,7 +138,11 @@ export function CenterPanel(): JSX.Element {
                     <Spicetify.ReactComponent.TooltipWrapper label="Save workflow">
                         <Spicetify.ReactComponent.ButtonTertiary
                             aria-label="Save workflow"
-                            disabled={!hasPendingChanges || !isValid}
+                            disabled={
+                                !hasPendingChanges ||
+                                !isValid ||
+                                workflowName.trim().length === 0
+                            }
                             onClick={async () => {
                                 await saveWorkflow();
                             }}

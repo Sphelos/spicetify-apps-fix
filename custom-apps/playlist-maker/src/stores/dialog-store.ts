@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import type { SavedWorkflowMetadata } from '../db/workflows/saved-workflow';
 
+export type ConfirmDialogOpenKey =
+    | 'showConfirmNewModal'
+    | 'showConfirmLoadModal'
+    | 'showConfirmDeleteModal';
+
+export type ConfirmDialogSetterKey =
+    | 'setShowConfirmNewModal'
+    | 'setShowConfirmLoadModal'
+    | 'setShowConfirmDeleteModal';
+
 export type DialogState = {
     showConfirmNewModal: boolean;
     showConfirmLoadModal: boolean;

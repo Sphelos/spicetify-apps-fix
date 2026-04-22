@@ -8,34 +8,31 @@ import useAppStore, {
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { ConfirmDialog } from '../../shared/ConfirmDialog';
+import { useConfirmDialogState } from './useConfirmDialogState';
 
 export function ConfirmLoadDialog(): JSX.Element {
     const { loadWorkflow }: Pick<AppState, 'loadWorkflow'> = useAppStore(
         useShallow((state) => ({ loadWorkflow: state.loadWorkflow })),
     );
 
-    const {
-        showConfirmLoadModal,
-        setShowConfirmLoadModal,
-        selectedWorkflow,
-    }: Pick<
-        DialogState,
-        'showConfirmLoadModal' | 'setShowConfirmLoadModal' | 'selectedWorkflow'
-    > = useDialogStore(
+    const { selectedWorkflow }: Pick<DialogState, 'selectedWorkflow'> = useDialogStore(
         useShallow((state) => {
             return {
-                showConfirmLoadModal: state.showConfirmLoadModal,
-                setShowConfirmLoadModal: state.setShowConfirmLoadModal,
                 selectedWorkflow: state.selectedWorkflow,
             };
         }),
     );
 
+    const { isOpen, closeDialog } = useConfirmDialogState(
+        'showConfirmLoadModal',
+        'setShowConfirmLoadModal',
+    );
+
     return (
         <ConfirmDialog
-            isOpen={showConfirmLoadModal}
+            isOpen={isOpen}
             onConfirm={async () => {
-                setShowConfirmLoadModal(false);
+                closeDialog();
 
                 if (selectedWorkflow === null) {
                     Spicetify.showNotification(
@@ -60,12 +57,8 @@ export function ConfirmLoadDialog(): JSX.Element {
                 loadWorkflow(workflowToLoad);
                 Spicetify.PopupModal.hide();
             }}
-            onClose={() => {
-                setShowConfirmLoadModal(false);
-            }}
-            onOutside={() => {
-                setShowConfirmLoadModal(false);
-            }}
+            onClose={closeDialog}
+            onOutside={closeDialog}
             titleText="Load workflow"
             descriptionText="You have unsaved changes that will be lost. Confirm?"
         />

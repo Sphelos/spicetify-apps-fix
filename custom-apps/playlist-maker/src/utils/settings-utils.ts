@@ -1,5 +1,16 @@
+import { z } from 'zod';
+
 const CONFIRM_DIALOG_BACKDROP_KEY =
     'playlist-maker:confirm-dialog-backdrop-style';
+
+const confirmDialogBackdropStyleSchema = z.enum([
+    'transparent',
+    'light-dim',
+    'shadow-only',
+]);
+
+const defaultConfirmDialogBackdropStyle: ConfirmDialogBackdropStyle =
+    'light-dim';
 
 export type ConfirmDialogBackdropStyle =
     | 'transparent'
@@ -28,22 +39,29 @@ export const confirmDialogBackdropOptions: {
     },
 ];
 
+export function resolveConfirmDialogBackdropStyle(
+    value: string | null | undefined,
+): ConfirmDialogBackdropStyle {
+    const result = confirmDialogBackdropStyleSchema.safeParse(value);
+
+    if (result.success) {
+        return result.data;
+    }
+
+    return defaultConfirmDialogBackdropStyle;
+}
+
 export function getConfirmDialogBackdropStyle(): ConfirmDialogBackdropStyle {
     const value = Spicetify.LocalStorage.get(CONFIRM_DIALOG_BACKDROP_KEY);
 
-    if (
-        value === 'transparent' ||
-        value === 'light-dim' ||
-        value === 'shadow-only'
-    ) {
-        return value;
-    }
-
-    return 'light-dim';
+    return resolveConfirmDialogBackdropStyle(value);
 }
 
 export function setConfirmDialogBackdropStyle(
     value: ConfirmDialogBackdropStyle,
 ): void {
-    Spicetify.LocalStorage.set(CONFIRM_DIALOG_BACKDROP_KEY, value);
+    Spicetify.LocalStorage.set(
+        CONFIRM_DIALOG_BACKDROP_KEY,
+        resolveConfirmDialogBackdropStyle(value),
+    );
 }

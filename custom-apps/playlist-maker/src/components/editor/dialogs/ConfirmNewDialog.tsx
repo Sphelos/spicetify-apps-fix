@@ -1,44 +1,30 @@
-import useDialogStore, {
-    type DialogState,
-} from 'custom-apps/playlist-maker/src/stores/dialog-store';
 import useAppStore, {
     type AppState,
 } from 'custom-apps/playlist-maker/src/stores/store';
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { ConfirmDialog } from '../../shared/ConfirmDialog';
+import { useConfirmDialogState } from './useConfirmDialogState';
 
 export function ConfirmNewDialog(): JSX.Element {
     const { resetState }: Pick<AppState, 'resetState'> = useAppStore(
         useShallow((state) => ({ resetState: state.resetState })),
     );
 
-    const {
-        showConfirmNewModal,
-        setShowConfirmNewModal,
-    }: Pick<DialogState, 'showConfirmNewModal' | 'setShowConfirmNewModal'> =
-        useDialogStore(
-            useShallow((state) => {
-                return {
-                    showConfirmNewModal: state.showConfirmNewModal,
-                    setShowConfirmNewModal: state.setShowConfirmNewModal,
-                };
-            }),
-        );
+    const { isOpen, closeDialog } = useConfirmDialogState(
+        'showConfirmNewModal',
+        'setShowConfirmNewModal',
+    );
 
     return (
         <ConfirmDialog
-            isOpen={showConfirmNewModal}
+            isOpen={isOpen}
             onConfirm={() => {
-                setShowConfirmNewModal(false);
+                closeDialog();
                 resetState();
             }}
-            onClose={() => {
-                setShowConfirmNewModal(false);
-            }}
-            onOutside={() => {
-                setShowConfirmNewModal(false);
-            }}
+            onClose={closeDialog}
+            onOutside={closeDialog}
             titleText="Create new workflow"
             descriptionText="You have unsaved changes that will be lost. Confirm?"
         />

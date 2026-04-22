@@ -5,42 +5,33 @@ import useDialogStore, {
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { ConfirmDialog } from '../../shared/ConfirmDialog';
+import { useConfirmDialogState } from './useConfirmDialogState';
 
 export function ConfirmDeleteDialog(): JSX.Element {
-    const {
-        showConfirmDeleteModal,
-        setShowConfirmDeleteModal,
-        selectedWorkflow,
-    }: Pick<
-        DialogState,
-        | 'showConfirmDeleteModal'
-        | 'setShowConfirmDeleteModal'
-        | 'selectedWorkflow'
-    > = useDialogStore(
+    const { selectedWorkflow }: Pick<DialogState, 'selectedWorkflow'> = useDialogStore(
         useShallow((state) => {
             return {
-                showConfirmDeleteModal: state.showConfirmDeleteModal,
-                setShowConfirmDeleteModal: state.setShowConfirmDeleteModal,
                 selectedWorkflow: state.selectedWorkflow,
             };
         }),
     );
 
+    const { isOpen, closeDialog } = useConfirmDialogState(
+        'showConfirmDeleteModal',
+        'setShowConfirmDeleteModal',
+    );
+
     return (
         <ConfirmDialog
-            isOpen={showConfirmDeleteModal}
+            isOpen={isOpen}
             onConfirm={async () => {
-                setShowConfirmDeleteModal(false);
+                closeDialog();
                 if (selectedWorkflow !== null) {
                     await deleteWorkflow(selectedWorkflow.id);
                 }
             }}
-            onClose={() => {
-                setShowConfirmDeleteModal(false);
-            }}
-            onOutside={() => {
-                setShowConfirmDeleteModal(false);
-            }}
+            onClose={closeDialog}
+            onOutside={closeDialog}
             titleText="Delete workflow"
             descriptionText={`Are you sure you want to delete the workflow "${selectedWorkflow?.name ?? ''}" ?`}
         />

@@ -3,6 +3,18 @@
 This changelog tracks fork-specific changes for `playlist-maker` in the
 `spicetify-apps-fix` fork. Newest entries go at the top and stay concise.
 
+## 1.4.1-sphelos.4
+
+- Added safe validation for the saved confirmation-modal backdrop setting, so
+  bad or older local values now fall back cleanly instead of relying on loose
+  runtime checks.
+- Cleaned up the workflow confirmation flow by sharing dialog open/close state
+  handling and tightening workflow loading logic.
+- Fixed the saved-workflows list rendering to use stable React keys and trimmed
+  workflow names on save to avoid accidental blank-space-only names.
+
+---
+
 ## 1.4.1-sphelos.3
 
 - Added focused tests for the custom confirmation modal behavior.

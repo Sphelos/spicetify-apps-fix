@@ -9,6 +9,19 @@ import { getAllSorted, getWorkflow } from '../../db/workflows/workflow-db';
 import useDialogStore, { type DialogState } from '../../stores/dialog-store';
 import useAppStore, { type AppState } from '../../stores/store';
 
+async function getWorkflowOrNotify(
+    workflowId: string,
+): Promise<Awaited<ReturnType<typeof getWorkflow>>> {
+    const workflowToLoad = await getWorkflow(workflowId);
+
+    if (workflowToLoad === undefined) {
+        Spicetify.showNotification('Failed to load workflow', true, 2000);
+        return undefined;
+    }
+
+    return workflowToLoad;
+}
+
 export function WorkflowsModal(): JSX.Element {
     const {
         hasPendingChanges,
@@ -57,31 +70,29 @@ export function WorkflowsModal(): JSX.Element {
         [],
     );
 
-    const onDeleteWorkflow = (workflow: SavedWorkflowMetadata) => {
+    const onDeleteWorkflow = (workflow: SavedWorkflowMetadata): void => {
         setSelectedWorkflow(workflow);
         setShowConfirmDeleteModal(true);
     };
 
-    const onLoadWorkflow = async (workflow: SavedWorkflowMetadata) => {
+    const onLoadWorkflow = async (
+        workflow: SavedWorkflowMetadata,
+    ): Promise<void> => {
         setSelectedWorkflow(workflow);
 
         if (hasPendingChanges) {
             setShowConfirmLoadModal(true);
-        } else {
-            const workflowToLoad = await getWorkflow(workflow.id);
-
-            if (workflowToLoad === undefined) {
-                Spicetify.showNotification(
-                    'Failed to load workflow',
-                    true,
-                    2000,
-                );
-                return;
-            }
-
-            loadWorkflow(workflowToLoad);
-            Spicetify.PopupModal.hide();
+            return;
         }
+
+        const workflowToLoad = await getWorkflowOrNotify(workflow.id);
+
+        if (workflowToLoad === undefined) {
+            return;
+        }
+
+        loadWorkflow(workflowToLoad);
+        Spicetify.PopupModal.hide();
     };
 
     return (
@@ -102,9 +113,8 @@ export function WorkflowsModal(): JSX.Element {
             )}
             {savedWorkflows.map((workflow, index) => {
                 return (
-                    <>
+                    <React.Fragment key={workflow.id}>
                         <div
-                            key={workflow.id}
                             className="flex flex-row items-center justify-between"
                         >
                             <div className="flex flex-col gap-1">
@@ -150,7 +160,7 @@ export function WorkflowsModal(): JSX.Element {
                         {index < savedWorkflows.length - 1 && (
                             <hr className="my-2 divide-solid opacity-20" />
                         )}
-                    </>
+                    </React.Fragment>
                 );
             })}
         </>
