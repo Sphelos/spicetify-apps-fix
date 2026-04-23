@@ -15,6 +15,6 @@
     "license": "MIT",
     "devDependencies": {
         "i18next": "^23.7.6",
-        "lucide-react": "^0.381.0"
+        "lucide-react": "^0.475.0"
     }
 }

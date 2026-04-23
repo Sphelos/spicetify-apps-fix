@@ -15,7 +15,7 @@
     },
     "devDependencies": {
         "@types/tinycolor2": "^1.4.6",
-        "lucide-react": "^0.299.0",
+        "lucide-react": "^0.475.0",
         "observable-hooks": "^4.2.3",
         "rxjs": "^7.8.1",
         "spcr-whats-new": "^1.0.1",
