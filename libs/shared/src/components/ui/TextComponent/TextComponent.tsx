@@ -34,45 +34,60 @@ export function TextComponent(
     props: Readonly<PropsWithChildren<Props>>,
 ): JSX.Element {
     const { elementType = 'span', children, fontSize, style, ...rest } = props;
+    const textComponent = Spicetify.ReactComponent.TextComponent;
+
+    if (textComponent === undefined) {
+        return React.createElement(
+            elementType,
+            {
+                ...rest,
+                style: {
+                    ...style,
+                    fontSize,
+                    display: props.paddingBottom ? 'block' : style?.display,
+                },
+            },
+            children,
+        );
+    }
 
     let SpicetifyTextComponent: React.ElementType;
 
     switch (elementType) {
         case 'h1':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.h1;
+            SpicetifyTextComponent = textComponent.h1;
             break;
         case 'h2':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.h2;
+            SpicetifyTextComponent = textComponent.h2;
             break;
         case 'h3':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.h3;
+            SpicetifyTextComponent = textComponent.h3;
             break;
         case 'h4':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.h4;
+            SpicetifyTextComponent = textComponent.h4;
             break;
         case 'h5':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.h5;
+            SpicetifyTextComponent = textComponent.h5;
             break;
         case 'h6':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.h6;
+            SpicetifyTextComponent = textComponent.h6;
             break;
         case 'li':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.li;
+            SpicetifyTextComponent = textComponent.li;
             break;
         case 'p':
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent.p;
+            SpicetifyTextComponent = textComponent.p;
             break;
         case 'small':
             SpicetifyTextComponent =
                 // eslint-disable-next-line @typescript-eslint/no-deprecated
-                Spicetify.ReactComponent.TextComponent.small;
+                textComponent.small;
             break;
         case 'span':
-            SpicetifyTextComponent =
-                Spicetify.ReactComponent.TextComponent.span;
+            SpicetifyTextComponent = textComponent.span;
             break;
         default:
-            SpicetifyTextComponent = Spicetify.ReactComponent.TextComponent;
+            SpicetifyTextComponent = textComponent;
             break;
     }
 

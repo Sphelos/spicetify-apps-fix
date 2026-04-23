@@ -1,6 +1,6 @@
 {
     "name": "playlist-maker",
-    "version": "1.4.1-sphelos.4",
+    "version": "1.4.1-sphelos.6",
     "private": true,
     "scripts": {
         "init": "npm run build && npm run apply",

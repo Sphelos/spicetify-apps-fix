@@ -48,7 +48,7 @@ export function usePlayStatus(): PlayStatus {
                 handleStatusChange,
             );
         };
-    });
+    }, []);
 
     return playStatus;
 }

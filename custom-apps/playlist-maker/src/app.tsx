@@ -20,6 +20,61 @@ import { ResultPage } from './components/result/ResultPage';
 import { EDITOR_ROUTE, RESULT_ROUTE } from './constants';
 import useAppStore from './stores/store';
 
+type ErrorBoundaryProps = {
+    children: React.ReactNode;
+};
+
+type ErrorBoundaryState = {
+    errorMessage: string | null;
+};
+
+class ResultPageErrorBoundary extends React.Component<
+    ErrorBoundaryProps,
+    ErrorBoundaryState
+> {
+    public constructor(props: ErrorBoundaryProps) {
+        super(props);
+        this.state = {
+            errorMessage: null,
+        };
+    }
+
+    public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+        return {
+            errorMessage:
+                error instanceof Error ? error.message : 'Unknown result error',
+        };
+    }
+
+    public override componentDidCatch(error: unknown): void {
+        const message =
+            error instanceof Error ? error.message : 'Unknown result error';
+
+        console.error('playlist-maker Result page crashed', error);
+        Spicetify.showNotification(`Result tab error: ${message}`, true, 8000);
+    }
+
+    public override render(): React.ReactNode {
+        if (this.state.errorMessage !== null) {
+            return (
+                <div className="app-container p-8">
+                    <TextComponent elementType="h2" weight="bold">
+                        Result view failed to render
+                    </TextComponent>
+                    <TextComponent
+                        elementType="p"
+                        semanticColor="textSubdued"
+                    >
+                        {this.state.errorMessage}
+                    </TextComponent>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
 type ResultTopBarItemData = {
     resultCount: number;
 };
@@ -106,7 +161,11 @@ function App(): JSX.Element {
             currentPage = <EditorPage />;
             break;
         case RESULT_ROUTE:
-            currentPage = <ResultPage />;
+            currentPage = (
+                <ResultPageErrorBoundary>
+                    <ResultPage />
+                </ResultPageErrorBoundary>
+            );
             break;
         default:
             history.replace(EDITOR_ROUTE);

@@ -22,7 +22,7 @@ export function useCurrentPlayerTrackUri(): string | undefined {
                 handleSongChange,
             );
         };
-    });
+    }, []);
 
     return playingTrackUri;
 }

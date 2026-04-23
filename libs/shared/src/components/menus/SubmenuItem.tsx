@@ -7,8 +7,22 @@ export type Props = {
 };
 
 export function SubmenuItem(props: Readonly<Props>): JSX.Element {
+    const ContextMenuComponent = Spicetify.ReactComponent.ContextMenu;
+    const MenuItemComponent = Spicetify.ReactComponent.MenuItem;
+
+    if (
+        typeof ContextMenuComponent !== 'function' ||
+        typeof MenuItemComponent !== 'function'
+    ) {
+        return (
+            <div role="menuitem" aria-disabled="true">
+                <span>{props.label}</span>
+            </div>
+        );
+    }
+
     return (
-        <Spicetify.ReactComponent.ContextMenu
+        <ContextMenuComponent
             trigger="click"
             action="toggle"
             placement="right-end"
@@ -22,7 +36,7 @@ export function SubmenuItem(props: Readonly<Props>): JSX.Element {
                     e.currentTarget.click();
                 }}
             >
-                <Spicetify.ReactComponent.MenuItem
+                <MenuItemComponent
                     leadingIcon={props.leadingIcon}
                     trailingIcon={
                         <svg
@@ -38,8 +52,8 @@ export function SubmenuItem(props: Readonly<Props>): JSX.Element {
                     }
                 >
                     <span>{props.label}</span>
-                </Spicetify.ReactComponent.MenuItem>
+                </MenuItemComponent>
             </div>
-        </Spicetify.ReactComponent.ContextMenu>
+        </ContextMenuComponent>
     );
 }

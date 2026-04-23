@@ -10,6 +10,7 @@ export type Props = {
 
 export function PlaylistSelectionMenu(props: Readonly<Props>): JSX.Element {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const MenuItemComponent = Spicetify.ReactComponent.MenuItem;
 
     useEffect(() => {
         async function getPlaylists(): Promise<void> {
@@ -35,15 +36,19 @@ export function PlaylistSelectionMenu(props: Readonly<Props>): JSX.Element {
     return (
         <Menu>
             {playlists.map((p) => {
+                if (typeof MenuItemComponent !== 'function') {
+                    return <div key={p.uri}>{p.name}</div>;
+                }
+
                 return (
-                    <Spicetify.ReactComponent.MenuItem
+                    <MenuItemComponent
                         onClick={async () => {
                             await addToPlaylist(p.uri);
                         }}
                         key={p.uri}
                     >
                         <span>{p.name}</span>
-                    </Spicetify.ReactComponent.MenuItem>
+                    </MenuItemComponent>
                 );
             })}
         </Menu>

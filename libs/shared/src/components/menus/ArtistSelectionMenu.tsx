@@ -7,18 +7,24 @@ export type Props = {
 };
 
 export function ArtistSelectionMenu(props: Readonly<Props>): JSX.Element {
+    const MenuItemComponent = Spicetify.ReactComponent.MenuItem;
+
     return (
         <Menu>
             {props.artists.map((a) => {
+                if (typeof MenuItemComponent !== 'function') {
+                    return <div key={a.uri}>{a.name}</div>;
+                }
+
                 return (
-                    <Spicetify.ReactComponent.MenuItem
+                    <MenuItemComponent
                         onClick={() => {
                             props.onArtistClick(a.uri);
                         }}
                         key={a.uri}
                     >
                         <span>{a.name}</span>
-                    </Spicetify.ReactComponent.MenuItem>
+                    </MenuItemComponent>
                 );
             })}
         </Menu>

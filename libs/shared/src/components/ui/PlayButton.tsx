@@ -9,6 +9,8 @@ export type Props = {
 };
 
 export function PlayButton(props: Readonly<Props>): JSX.Element {
+    const ButtonPrimaryComponent = Spicetify.ReactComponent.ButtonPrimary;
+
     let legacySize: Spicetify.ReactComponent.ButtonProps['size'] | undefined;
 
     if (props.size === 'lg') {
@@ -19,8 +21,23 @@ export function PlayButton(props: Readonly<Props>): JSX.Element {
         legacySize = 'small';
     }
 
+    if (typeof ButtonPrimaryComponent !== 'function') {
+        return (
+            <button
+                type="button"
+                aria-label={getTranslation(['play'])}
+                disabled={props.disabled}
+                onClick={() => {
+                    props.onClick();
+                }}
+            >
+                <SpotifyIcon icon="play" />
+            </button>
+        );
+    }
+
     return (
-        <Spicetify.ReactComponent.ButtonPrimary
+        <ButtonPrimaryComponent
             aria-label={getTranslation(['play'])}
             size={legacySize}
             buttonSize={props.size}
@@ -30,6 +47,6 @@ export function PlayButton(props: Readonly<Props>): JSX.Element {
                 props.onClick();
             }}
             iconOnly={() => <SpotifyIcon icon="play" />}
-        ></Spicetify.ReactComponent.ButtonPrimary>
+        ></ButtonPrimaryComponent>
     );
 }

@@ -51,6 +51,15 @@ export function TrackListRow(props: PropsWithChildren<Props>): JSX.Element {
     const visible = useIntersectionObserver(rowRef);
     const [isHovered, setIsHovered] = useState(false);
     const [trackInLibrary, setTrackInLibrary] = useIsInLibrary(props.track.uri);
+    const TooltipWrapperComponent = Spicetify.ReactComponent.TooltipWrapper;
+    const ButtonTertiaryComponent = Spicetify.ReactComponent.ButtonTertiary;
+    const ContextMenuComponent = Spicetify.ReactComponent.ContextMenu;
+    const RightClickMenuComponent = Spicetify.ReactComponent.RightClickMenu;
+    const supportsRowMenus =
+        typeof ContextMenuComponent === 'function' &&
+        typeof RightClickMenuComponent === 'function' &&
+        typeof Spicetify.ReactComponent.Menu === 'function' &&
+        typeof Spicetify.ReactComponent.MenuItem === 'function';
 
     async function addToLikedSongs(): Promise<void> {
         const libraryApi = getPlatform().LibraryAPI;
@@ -68,9 +77,14 @@ export function TrackListRow(props: PropsWithChildren<Props>): JSX.Element {
 
     useEffect(() => {
         const libraryApi = getPlatform().LibraryAPI;
+        const events = libraryApi.getEvents?.();
 
         if (!visible) {
             // Only listen to the event when the row is visible
+            return;
+        }
+
+        if (events === undefined) {
             return;
         }
 
@@ -84,12 +98,10 @@ export function TrackListRow(props: PropsWithChildren<Props>): JSX.Element {
             }
         };
 
-        libraryApi.getEvents().addListener('operation_complete', listener);
+        events.addListener('operation_complete', listener);
 
         return () => {
-            libraryApi
-                .getEvents()
-                .removeListener('operation_complete', listener);
+            events.removeListener('operation_complete', listener);
         };
     }, [visible, props.track.uri, setTrackInLibrary]);
 
@@ -101,54 +113,65 @@ export function TrackListRow(props: PropsWithChildren<Props>): JSX.Element {
         ></div>
     );
 
-    const addToLibraryButton = (
-        <Spicetify.ReactComponent.TooltipWrapper
-            label={getTranslation(['save_to_your_liked_songs'])}
-            showDelay={100}
-        >
-            <Spicetify.ReactComponent.ButtonTertiary
-                aria-label={getTranslation(['save_to_your_liked_songs'])}
-                iconOnly={() => <SpotifyIcon icon="plus-alt" iconSize={16} />}
+    const addToLibraryButton =
+        typeof TooltipWrapperComponent === 'function' &&
+        typeof ButtonTertiaryComponent === 'function' ? (
+            <TooltipWrapperComponent
+                label={getTranslation(['save_to_your_liked_songs'])}
+                showDelay={100}
+            >
+                <ButtonTertiaryComponent
+                    aria-label={getTranslation(['save_to_your_liked_songs'])}
+                    iconOnly={() => <SpotifyIcon icon="plus-alt" iconSize={16} />}
+                    buttonSize="sm"
+                    style={{
+                        padding: 0,
+                        visibility: isHovered ? undefined : 'hidden',
+                    }}
+                    onClick={addToLikedSongs}
+                ></ButtonTertiaryComponent>
+            </TooltipWrapperComponent>
+        ) : (
+            <></>
+        );
+
+    const removeFromLibraryButton =
+        typeof TooltipWrapperComponent === 'function' &&
+        typeof ButtonTertiaryComponent === 'function' ? (
+            <TooltipWrapperComponent
+                label={getTranslation(['remove_from_your_liked_songs'])}
+                showDelay={100}
+            >
+                <ButtonTertiaryComponent
+                    aria-label={getTranslation(['remove_from_your_liked_songs'])}
+                    iconOnly={() => (
+                        <SpotifyIcon icon="check-alt-fill" iconSize={16} />
+                    )}
+                    buttonSize="sm"
+                    style={{
+                        padding: 0,
+                    }}
+                    onClick={removeFromLikedSongs}
+                    semanticColor="essentialBrightAccent"
+                ></ButtonTertiaryComponent>
+            </TooltipWrapperComponent>
+        ) : (
+            <></>
+        );
+
+    const emptyButton =
+        typeof ButtonTertiaryComponent === 'function' ? (
+            <ButtonTertiaryComponent
+                iconOnly={() => <></>}
                 buttonSize="sm"
                 style={{
                     padding: 0,
                     visibility: isHovered ? undefined : 'hidden',
                 }}
-                onClick={addToLikedSongs}
-            ></Spicetify.ReactComponent.ButtonTertiary>
-        </Spicetify.ReactComponent.TooltipWrapper>
-    );
-
-    const removeFromLibraryButton = (
-        <Spicetify.ReactComponent.TooltipWrapper
-            label={getTranslation(['remove_from_your_liked_songs'])}
-            showDelay={100}
-        >
-            <Spicetify.ReactComponent.ButtonTertiary
-                aria-label={getTranslation(['remove_from_your_liked_songs'])}
-                iconOnly={() => (
-                    <SpotifyIcon icon="check-alt-fill" iconSize={16} />
-                )}
-                buttonSize="sm"
-                style={{
-                    padding: 0,
-                }}
-                onClick={removeFromLikedSongs}
-                semanticColor="essentialBrightAccent"
-            ></Spicetify.ReactComponent.ButtonTertiary>
-        </Spicetify.ReactComponent.TooltipWrapper>
-    );
-
-    const emptyButton = (
-        <Spicetify.ReactComponent.ButtonTertiary
-            iconOnly={() => <></>}
-            buttonSize="sm"
-            style={{
-                padding: 0,
-                visibility: isHovered ? undefined : 'hidden',
-            }}
-        ></Spicetify.ReactComponent.ButtonTertiary>
-    );
+            ></ButtonTertiaryComponent>
+        ) : (
+            <></>
+        );
 
     let libraryButton: JSX.Element;
 
@@ -177,9 +200,198 @@ export function TrackListRow(props: PropsWithChildren<Props>): JSX.Element {
             }}
         >
             {visible ? (
-                <Spicetify.ReactComponent.RightClickMenu
-                    menu={props.getRowMenu(props.track)}
-                >
+                supportsRowMenus ? (
+                    <RightClickMenuComponent menu={props.getRowMenu(props.track)}>
+                        <div
+                            aria-selected={props.selected}
+                            onClick={props.onClick}
+                            onDoubleClick={() => {
+                                if (props.track.isPlayable) {
+                                    props.onDoubleClick();
+                                }
+                            }}
+                            draggable="true"
+                            onDragStart={(e) => {
+                                if (props.dragHandler.draggable) {
+                                    props.dragHandler.onDragStart(e);
+                                }
+                            }}
+                        >
+                            <div
+                                className={`main-trackList-trackListRow main-trackList-trackListRowGrid ${
+                                    props.active ? 'main-trackList-active' : ''
+                                } ${
+                                    props.selected ? 'main-trackList-selected' : ''
+                                } ${
+                                    props.displayType === 'compact'
+                                        ? 'main-trackList-rowCompactMode'
+                                        : ''
+                                }`}
+                                style={{
+                                    opacity: props.track.isPlayable ? 1 : 0.4,
+                                }}
+                            >
+                                <div
+                                    className="main-trackList-rowSectionIndex"
+                                    aria-colindex={1}
+                                    tabIndex={-1}
+                                >
+                                    <div className="main-trackList-rowMarker">
+                                        {!props.playing ? (
+                                            <>
+                                                <span className="main-trackList-number">
+                                                    {props.index}
+                                                </span>
+
+                                                {props.track.isPlayable && (
+                                                    <TooltipWrapperComponent
+                                                        label={getTranslation(
+                                                            ['tracklist.a11y.play'],
+                                                            props.track.name,
+                                                            props.track.artists
+                                                                .map((a) => a.name)
+                                                                .join(', '),
+                                                        )}
+                                                        showDelay={200}
+                                                    >
+                                                        <button
+                                                            className="main-trackList-rowImagePlayButton"
+                                                            aria-label={getTranslation(
+                                                                [
+                                                                    'tracklist.a11y.play',
+                                                                ],
+                                                                props.track.name,
+                                                                props.track.artists
+                                                                    .map(
+                                                                        (a) =>
+                                                                            a.name,
+                                                                    )
+                                                                    .join(', '),
+                                                            )}
+                                                            onClick={() => {
+                                                                if (props.active) {
+                                                                    Spicetify.Player.play();
+                                                                } else if (
+                                                                    props.track
+                                                                        .isPlayable
+                                                                ) {
+                                                                    props.onDoubleClick();
+                                                                }
+                                                            }}
+                                                            tabIndex={-1}
+                                                        >
+                                                            <svg
+                                                                height="24"
+                                                                width="24"
+                                                                aria-hidden="true"
+                                                                className="main-trackList-rowPlayPauseIcon"
+                                                                viewBox="0 0 24 24"
+                                                                data-encore-id="icon"
+                                                                fill="currentColor"
+                                                            >
+                                                                <path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </TooltipWrapperComponent>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <img
+                                                    className="main-trackList-playingIcon"
+                                                    width="14"
+                                                    height="14"
+                                                    alt=""
+                                                    src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {props.children !== undefined &&
+                                    Children.map(props.children, (child, index) => {
+                                        return (
+                                            <div
+                                                className={
+                                                    index === 0
+                                                        ? 'main-trackList-rowSectionStart'
+                                                        : 'main-trackList-rowSectionVariable'
+                                                }
+                                                aria-colindex={index + 2}
+                                                tabIndex={-1}
+                                            >
+                                                {child}
+                                            </div>
+                                        );
+                                    })}
+
+                                <div
+                                    className="main-trackList-rowSectionEnd"
+                                    aria-colindex={
+                                        Children.count(props.children) + 2
+                                    }
+                                    tabIndex={-1}
+                                >
+                                    {libraryButton}
+
+                                    <TextComponent
+                                        variant="mesto"
+                                        semanticColor="textSubdued"
+                                        className="main-trackList-rowDuration"
+                                    >
+                                        {Spicetify.Player.formatTime(
+                                            props.track.duration,
+                                        )}
+                                    </TextComponent>
+
+                                    <TooltipWrapperComponent
+                                        label={getTranslation(
+                                            ['more.label.track'],
+                                            props.track.name,
+                                            props.track.artists
+                                                .map((a) => a.name)
+                                                .join(', '),
+                                        )}
+                                        showDelay={100}
+                                    >
+                                        <div>
+                                            <ContextMenuComponent
+                                                trigger="click"
+                                                action="toggle"
+                                                menu={props.getRowMenu(props.track)}
+                                            >
+                                                <ButtonTertiaryComponent
+                                                    aria-label={getTranslation(
+                                                        ['more.label.track'],
+                                                        props.track.name,
+                                                        props.track.artists
+                                                            .map((a) => a.name)
+                                                            .join(', '),
+                                                    )}
+                                                    aria-haspopup="menu"
+                                                    iconOnly={() => (
+                                                        <SpotifyIcon
+                                                            icon="more"
+                                                            iconSize={16}
+                                                        />
+                                                    )}
+                                                    buttonSize="sm"
+                                                    style={{
+                                                        padding: 0,
+                                                        visibility: isHovered
+                                                            ? undefined
+                                                            : 'hidden',
+                                                    }}
+                                                ></ButtonTertiaryComponent>
+                                            </ContextMenuComponent>
+                                        </div>
+                                    </TooltipWrapperComponent>
+                                </div>
+                            </div>
+                        </div>
+                    </RightClickMenuComponent>
+                ) : (
                     <div
                         aria-selected={props.selected}
                         onClick={props.onClick}
@@ -352,52 +564,10 @@ export function TrackListRow(props: PropsWithChildren<Props>): JSX.Element {
                                     )}
                                 </TextComponent>
 
-                                <Spicetify.ReactComponent.TooltipWrapper
-                                    label={getTranslation(
-                                        ['more.label.track'],
-                                        props.track.name,
-                                        props.track.artists
-                                            .map((a) => a.name)
-                                            .join(', '),
-                                    )}
-                                    showDelay={100}
-                                >
-                                    <div>
-                                        <Spicetify.ReactComponent.ContextMenu
-                                            trigger="click"
-                                            action="toggle"
-                                            menu={props.getRowMenu(props.track)}
-                                        >
-                                            <Spicetify.ReactComponent.ButtonTertiary
-                                                aria-label={getTranslation(
-                                                    ['more.label.track'],
-                                                    props.track.name,
-                                                    props.track.artists
-                                                        .map((a) => a.name)
-                                                        .join(', '),
-                                                )}
-                                                aria-haspopup="menu"
-                                                iconOnly={() => (
-                                                    <SpotifyIcon
-                                                        icon="more"
-                                                        iconSize={16}
-                                                    />
-                                                )}
-                                                buttonSize="sm"
-                                                style={{
-                                                    padding: 0,
-                                                    visibility: isHovered
-                                                        ? undefined
-                                                        : 'hidden',
-                                                }}
-                                            ></Spicetify.ReactComponent.ButtonTertiary>
-                                        </Spicetify.ReactComponent.ContextMenu>
-                                    </div>
-                                </Spicetify.ReactComponent.TooltipWrapper>
                             </div>
                         </div>
                     </div>
-                </Spicetify.ReactComponent.RightClickMenu>
+                )
             ) : (
                 placeholder
             )}

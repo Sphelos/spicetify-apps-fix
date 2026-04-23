@@ -14,6 +14,8 @@ type Props = {
  * Shows the image, the track name and artists.
  */
 export function TrackListRowImageTitle(props: Readonly<Props>): JSX.Element {
+    const [hasImageError, setHasImageError] = React.useState(false);
+
     const imageFallback = (
         <div className="main-trackList-rowImage main-trackList-rowImageFallback">
             <svg
@@ -30,22 +32,20 @@ export function TrackListRowImageTitle(props: Readonly<Props>): JSX.Element {
     );
 
     const imageUrl = getImageUrlFromAlbum(props.track.album);
+    const showImage = imageUrl !== '' && !hasImageError;
 
     return (
         <>
-            {imageUrl !== '' ? (
+            {showImage ? (
                 <img
                     loading="eager"
                     src={imageUrl}
                     className="main-image-image main-trackList-rowImage main-image-loaded rounded"
                     width="40"
                     height="40"
-                    onError={(e) =>
-                        (e.currentTarget.outerHTML =
-                            Spicetify.ReactDOMServer.renderToString(
-                                imageFallback,
-                            ))
-                    }
+                    onError={() => {
+                        setHasImageError(true);
+                    }}
                 />
             ) : (
                 imageFallback

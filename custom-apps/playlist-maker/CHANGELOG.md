@@ -3,6 +3,19 @@
 This changelog tracks fork-specific changes for `playlist-maker` in the
 `spicetify-apps-fix` fork. Newest entries go at the top and stay concise.
 
+## 1.4.1-sphelos.6
+
+- Fixed the `Result` tab on newer Spotify/Spicetify installs by removing its
+  dependency on Spotify's internal track-list context and replacing it with a
+  simpler standalone results view.
+- Guarded additional shared UI hooks and components that could hard-crash when
+  optional Spotify helpers are missing, including drag, library-state, icon,
+  text, menu, and image-fallback paths.
+- Kept a local error boundary around the result page so future runtime issues
+  surface as an app-level error instead of Spotify's generic reload crash.
+
+---
+
 ## 1.4.1-sphelos.4
 
 - Added safe validation for the saved confirmation-modal backdrop setting, so

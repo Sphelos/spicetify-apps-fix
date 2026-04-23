@@ -6,27 +6,42 @@ export type Props = Spicetify.ReactComponent.IconComponentProps & {
 };
 
 export function SpotifyIcon(props: Readonly<Props>): JSX.Element {
+    const IconComponent = Spicetify.ReactComponent.IconComponent;
+
+    if (typeof IconComponent !== 'function') {
+        return (
+            <span
+                aria-hidden="true"
+                style={{
+                    display: 'inline-flex',
+                    width: props.iconSize ?? 16,
+                    height: props.iconSize ?? 16,
+                }}
+            />
+        );
+    }
+
     if (props.icon) {
         return (
-            <Spicetify.ReactComponent.IconComponent
+            <IconComponent
                 iconSize={props.iconSize}
                 semanticColor={props.semanticColor}
                 dangerouslySetInnerHTML={{
                     __html: Spicetify.SVGIcons[props.icon],
                 }}
                 viewBox="0 0 16 16"
-            ></Spicetify.ReactComponent.IconComponent>
+            ></IconComponent>
         );
     } else if (props.iconPath) {
         return (
-            <Spicetify.ReactComponent.IconComponent
+            <IconComponent
                 iconSize={props.iconSize}
                 semanticColor={props.semanticColor}
                 dangerouslySetInnerHTML={{
                     __html: props.iconPath,
                 }}
                 viewBox="0 0 16 16"
-            ></Spicetify.ReactComponent.IconComponent>
+            ></IconComponent>
         );
     }
 

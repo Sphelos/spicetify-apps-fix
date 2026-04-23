@@ -1,6 +1,7 @@
 import type { DisplayType } from '@shared/components/track-list/models/sort-option';
 import { useCurrentPlayerTrackUri } from '@shared/hooks/use-current-uri';
 import { PlayStatus, usePlayStatus } from '@shared/hooks/use-play-status';
+import { createCompatibleDragHandler } from '@shared/utils/spicetify-utils';
 import { getTranslation } from '@shared/utils/translations.utils';
 import React, { useMemo, useState } from 'react';
 import type { ITrack } from './models/interfaces';
@@ -43,13 +44,13 @@ export function TrackListGrid<T extends string>(
         );
 
         if (mapAsArray.length === 0) {
-            return Spicetify.ReactHook.DragHandler({
+            return createCompatibleDragHandler({
                 itemUris: [],
                 dragLabelText: '',
             });
         }
 
-        return Spicetify.ReactHook.DragHandler({
+        return createCompatibleDragHandler({
             itemUris: mapAsArray.map((t) => t[0]),
             dragLabelText:
                 selectedTracks.size > 1
@@ -144,7 +145,9 @@ export function TrackListGrid<T extends string>(
 
                     {props.subtracks.map((sub) => {
                         return (
-                            <>
+                            <React.Fragment
+                                key={`subtracks-${sub.headerRow.key?.toString() ?? 'group'}`}
+                            >
                                 {sub.headerRow}
                                 {sub.tracks.map((track, index) => (
                                     <TrackListRow
@@ -174,7 +177,7 @@ export function TrackListGrid<T extends string>(
                                         {props.getRowContent(track)}
                                     </TrackListRow>
                                 ))}
-                            </>
+                            </React.Fragment>
                         );
                     })}
                 </div>
